@@ -72,4 +72,14 @@ excludePluginExt {
             //            excludeSoAbis 'x86'
         }
     }
+//     jars {
+//         BaiduLBS_Android_debug { //过滤架包的名称
+//             implementation = false
+//             path = "/libs/excludes/BaiduLBS_Android_7.5.2.jar" //架包的路径
+//             //            excludeClasses 'com.example.library.BaiduLocationService'
+//             excludePackages  = ['com.baidu.android']
+//             //            excludeSos 'liblocSDK7b'
+//             //            excludeSoAbis 'x86'
+//         }
+//     }
 }
