@@ -15,8 +15,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+  namespace 'com.example.library'
 
-    //更改生成的aar包的名称
+  //更改生成的aar包的名称
     libraryVariants.all { variant ->
         variant.outputs.all { output ->
             if ('release' == variant.buildType.name) {

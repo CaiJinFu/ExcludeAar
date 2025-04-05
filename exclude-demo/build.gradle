@@ -41,6 +41,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'coder.siy.test'
 }
 
 dependencies {
@@ -58,9 +59,17 @@ excludePluginExt {
             implementation = false
             path = "/libs/excludes/BaiduLBS_Android_debug.aar" //架包的路径
 //            excludeClasses 'com.example.library.BaiduLocationService'
-//            excludePackages  = ['com.baidu.android', 'com.baidu.lbsapi']
+           excludePackages  = ['com.baidu.android']
 //            excludeSos 'liblocSDK7b'
 //            excludeSoAbis 'x86'
+        }
+        BaiduLBS_Android_release { //过滤架包的名称
+            implementation = false
+            path = "/libs/excludes/BaiduLBS_Android_debug.aar" //架包的路径
+            //            excludeClasses 'com.example.library.BaiduLocationService'
+            excludePackages  = ['com.baidu.lbsapi']
+            //            excludeSos 'liblocSDK7b'
+            //            excludeSoAbis 'x86'
         }
     }
 }

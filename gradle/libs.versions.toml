@@ -2,8 +2,8 @@
 
 #下面是个表格语法
 [versions]
-kotlin_version = "1.5.30"
-gradle_tools = "7.1.3"
+kotlin_version = "1.6.21"
+gradle_tools = "7.4.2"
 target_sdk = "32"
 compile_sdk = "32"
 min_sdk = "14"
