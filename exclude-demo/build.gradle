@@ -132,9 +132,9 @@ excludePluginExt {
     aars {
         BaiduLBS_Android_debug { //过滤架包的名称
             implementation = false
-            path = "/libs/excludes/BaiduLBS_Android_debug.aar" //架包的路径
+            path = "../repo/androidx/activity/activity/1.2.4/activity-1.2.4.aar" //架包的路径
 //            excludeClasses 'com.example.library.BaiduLocationService'
-           excludePackages  = ['com.baidu.android']
+           excludePackages  = ['androidx.activity.result']
 //            excludeSos 'liblocSDK7b'
 //            excludeSoAbis 'x86'
         }
