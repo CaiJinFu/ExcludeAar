@@ -45,14 +45,16 @@ android {
 
 // 定义一个新的可解析配置，用于继承 implementation 的依赖
 configurations {
-  resolvableDeps {
-    canBeResolved = true // 设置为可解析
-    canBeConsumed = false // 不提供给下游消费
-    extendsFrom configurations.implementation
+  resolvableDeps { // 创建名为 resolvableDeps 的新配置
+    canBeResolved = true    // 允许解析该配置（获取实际文件）
+    canBeConsumed = false   // 禁止其他模块使用此配置
+    extendsFrom configurations.implementation // 继承所有 implementation 依赖
   }
 }
 
 task copyDependenciesToRepo {
+  group = "copyDependenciesTask"
+  description = "将项目的依赖项复制到指定的仓库目录，并生成POM文件"
   // 自定义 repo 输出目录
   File targetRepoDir = new File("${rootDir}/repo")
   doFirst {
@@ -91,7 +93,8 @@ task copyDependenciesToRepo {
 
 // 在项目根目录或 module 目录的 build.gradle 中添加
 task copyDependenciesToRepo2 {
-
+  group = "copyDependenciesTask"
+  description = "将项目的依赖项复制到指定的仓库目录，并生成POM文件"
   // 自定义 repo 输出目录
   File targetRepoDir = new File("${rootDir}/repo")
   doFirst {
@@ -150,7 +153,8 @@ dependencies {
   // 这里是为了测试jar，具体实现看dependencyConfig.gradle
   implementation libs.appcompat
   implementation libs.kotlin.stdlib
-  implementation "com.android.tools.build:gradle:7.4.2"
+  // implementation "com.android.tools.build:gradle:7.4.2"
+  // implementation(group: 'com.android.tools.build', name: 'gradle', version: '7.4.2')
 }
 
 excludePluginExt {
