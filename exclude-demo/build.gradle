@@ -3,158 +3,185 @@ apply plugin: 'kotlin-android'
 apply plugin: 'exclude_plugin'
 
 android {
-    compileSdkVersion libs.versions.compile.sdk.get().toInteger()
+  compileSdkVersion libs.versions.compile.sdk.get().toInteger()
 
-    defaultConfig {
-        applicationId "coder.siy.test"
-        minSdkVersion libs.versions.min.sdk.get().toInteger()
-        targetSdkVersion libs.versions.compile.sdk.get().toInteger()
-        versionCode libs.versions.version.code.get().toInteger()
-        versionName libs.versions.version.name.get()
+  defaultConfig {
+    applicationId "coder.siy.test"
+    minSdkVersion libs.versions.min.sdk.get().toInteger()
+    targetSdkVersion libs.versions.compile.sdk.get().toInteger()
+    versionCode libs.versions.version.code.get().toInteger()
+    versionName libs.versions.version.name.get()
+  }
+
+  signingConfigs {
+    keyTest {
+      keyAlias gradle.keyAlias
+      keyPassword gradle.keyPassword
+      storeFile file('exaar.jks')
+      storePassword gradle.storePassword
+      v2SigningEnabled false
     }
+  }
 
-
-    signingConfigs {
-        keyTest {
-            keyAlias gradle.keyAlias
-            keyPassword gradle.keyPassword
-            storeFile file('exaar.jks')
-            storePassword gradle.storePassword
-            v2SigningEnabled false
-        }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt')
+      resValue "string", "baiduKey", gradle.baidukey
+      signingConfig signingConfigs.keyTest
     }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
-            resValue "string", "baiduKey", gradle.baidukey
-            signingConfig signingConfigs.keyTest
-        }
-        debug {
-            minifyEnabled false
-            resValue "string", "baiduKey", gradle.baidukey
-            signingConfig signingConfigs.keyTest
-        }
+    debug {
+      minifyEnabled false
+      resValue "string", "baiduKey", gradle.baidukey
+      signingConfig signingConfigs.keyTest
     }
+  }
 
-    buildFeatures {
-        viewBinding true
-    }
-    namespace 'coder.siy.test'
+  buildFeatures {
+    viewBinding true
+  }
+  namespace 'coder.siy.test'
 }
 
 // 定义一个新的可解析配置，用于继承 implementation 的依赖
 configurations {
-    resolvableDeps {
-        canBeResolved = true   // 设置为可解析
-        canBeConsumed = false  // 不提供给下游消费
-        extendsFrom configurations.implementation
-    }
+  resolvableDeps {
+    canBeResolved = true // 设置为可解析
+    canBeConsumed = false // 不提供给下游消费
+    extendsFrom configurations.implementation
+  }
 }
 
 task copyDependenciesToRepo {
-    def targetRepoDir = file("${rootDir}/repo") // 自定义 repo 输出目录
+  // 自定义 repo 输出目录
+  File targetRepoDir = new File("${rootDir}/repo")
+  doFirst {
+    //删除repo目录
+    delete targetRepoDir
+  }
 
-    doLast {
-        configurations.resolvableDeps.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-            if (artifact.extension == 'aar') {
-                def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
-                def module = artifact.moduleVersion.id.name
-                def version = artifact.moduleVersion.id.version
+  doLast {
+    configurations.resolvableDeps.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        if (artifact.extension == 'aar') {
+            def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
+            def module = artifact.moduleVersion.id.name
+            def version = artifact.moduleVersion.id.version
 
-                // 生成目录结构
-                def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
-                outputDir.mkdirs()
+            // 生成目录结构
+            def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
+            outputDir.mkdirs()
 
-                // 拷贝 aar
-                def aarFile = artifact.file
-                def aarDestFile = new File(outputDir, "${module}-${version}.aar")
-                aarFile.withInputStream { input ->
-                    aarDestFile.withOutputStream { out -> out << input }
-                }
+            // 拷贝 aar
+            def aarFile = artifact.file
+            def aarDestFile = new File(outputDir, "${module}-${version}.aar")
+            aarFile.withInputStream { input ->
+                aarDestFile.withOutputStream { out -> out << input }
+            }
 
-                // 下载 pom 文件（这里以 Google 的仓库为例）
-                def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
-                def pomFile = new File(outputDir, "${module}-${version}.pom")
-                new URL(pomUrl).withInputStream { input ->
-                    pomFile.withOutputStream { out -> out << input }
-                }
+            // 下载 pom 文件（这里以 Google 的仓库为例）
+            def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
+            def pomFile = new File(outputDir, "${module}-${version}.pom")
+            new URL(pomUrl).withInputStream { input ->
+                pomFile.withOutputStream { out -> out << input }
             }
         }
     }
+  }
 }
 
 // 在项目根目录或 module 目录的 build.gradle 中添加
 task copyDependenciesToRepo2 {
-    def targetRepoDir = file("${rootDir}/repo") // 自定义 repo 输出目录
 
-    doLast {
-        // 如果只想处理 Debug 变体的依赖，则使用 debugRuntimeClasspath
-        configurations.debugRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-            if (artifact.extension == 'aar') {
-                def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
-                def module = artifact.moduleVersion.id.name
-                def version = artifact.moduleVersion.id.version
+  // 自定义 repo 输出目录
+  File targetRepoDir = new File("${rootDir}/repo")
+  doFirst {
+    //删除repo目录
+    delete targetRepoDir
+  }
 
-                // 生成目录结构
-                def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
-                outputDir.mkdirs()
+  doLast {
+    // 如果只想处理 Debug 变体的依赖，则使用 debugRuntimeClasspath
+    configurations.debugRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        if (artifact.extension == 'aar') {
+            def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
+            def module = artifact.moduleVersion.id.name
+            def version = artifact.moduleVersion.id.version
 
-                // 拷贝 aar
-                def aarFile = artifact.file
-                def aarDestFile = new File(outputDir, "${module}-${version}.aar")
-                aarFile.withInputStream { input ->
-                    aarDestFile.withOutputStream { out -> out << input }
-                }
+            // 生成目录结构
+            def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
+            outputDir.mkdirs()
 
-                // 下载 pom 文件
-                def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
-                def pomFile = new File(outputDir, "${module}-${version}.pom")
-                new URL(pomUrl).withInputStream { input ->
-                    pomFile.withOutputStream { out -> out << input }
-                }
+            // 拷贝 aar
+            def aarFile = artifact.file
+            def aarDestFile = new File(outputDir, "${module}-${version}.aar")
+            aarFile.withInputStream { input ->
+                aarDestFile.withOutputStream { out -> out << input }
+            }
+
+            // 下载 pom 文件
+            def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
+            def pomFile = new File(outputDir, "${module}-${version}.pom")
+            new URL(pomUrl).withInputStream { input ->
+                pomFile.withOutputStream { out -> out << input }
             }
         }
     }
+  }
+}
+
+// 扩展方法：递归删除目录（处理权限问题）
+def deleteRecursively(File file) {
+  if (file.isDirectory()) {
+    file.eachFileRecurse { child ->
+      deleteRecursively(child) // 递归删除子文件/目录
+    }
+  }
+  if (!file.delete()) {
+    // 处理只读文件（Windows 常见问题）
+    if (!file.setWritable(true)) {
+      throw new IOException("无法删除只读文件: ${file.absolutePath}")
+    }
+    file.delete()
+  }
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
-    //这里是为了测试jar，具体实现看dependencyConfig.gradle
-    implementation libs.appcompat
-    implementation libs.kotlin.stdlib
-    implementation "androidx.appcompat:appcompat:1.3.0"
-    // implementation project(":libraries:library")
+  implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
+  // 这里是为了测试jar，具体实现看dependencyConfig.gradle
+  implementation libs.appcompat
+  implementation libs.kotlin.stdlib
+  implementation "com.android.tools.build:gradle:7.4.2"
 }
 
 excludePluginExt {
-    aars {
-        BaiduLBS_Android_debug { //过滤架包的名称
-            implementation = false
-            path = "../repo/androidx/activity/activity/1.2.4/activity-1.2.4.aar" //架包的路径
-//            excludeClasses 'com.example.library.BaiduLocationService'
-           excludePackages  = ['androidx.activity.result']
-//            excludeSos 'liblocSDK7b'
-//            excludeSoAbis 'x86'
-        }
-        BaiduLBS_Android_release { //过滤架包的名称
-            implementation = false
-            path = "/libs/excludes/BaiduLBS_Android_debug.aar" //架包的路径
-            //            excludeClasses 'com.example.library.BaiduLocationService'
-            excludePackages  = ['com.baidu.lbsapi']
-            //            excludeSos 'liblocSDK7b'
-            //            excludeSoAbis 'x86'
-        }
+  aars {
+    BaiduLBS_Android_debug {
+      // 过滤架包的名称
+      implementation = false
+      path = "../repo/androidx/activity/activity/1.2.4/activity-1.2.4.aar" // 架包的路径
+      //            excludeClasses 'com.example.library.BaiduLocationService'
+      excludePackages = ['androidx.activity.result']
+      //            excludeSos 'liblocSDK7b'
+      //            excludeSoAbis 'x86'
     }
-//     jars {
-//         BaiduLBS_Android_debug { //过滤架包的名称
-//             implementation = false
-//             path = "/libs/excludes/BaiduLBS_Android_7.5.2.jar" //架包的路径
-//             //            excludeClasses 'com.example.library.BaiduLocationService'
-//             excludePackages  = ['com.baidu.android']
-//             //            excludeSos 'liblocSDK7b'
-//             //            excludeSoAbis 'x86'
-//         }
-//     }
+    BaiduLBS_Android_release {
+      // 过滤架包的名称
+      implementation = false
+      path = "/libs/excludes/BaiduLBS_Android_debug.aar" // 架包的路径
+      //            excludeClasses 'com.example.library.BaiduLocationService'
+      excludePackages = ['com.baidu.lbsapi']
+      //            excludeSos 'liblocSDK7b'
+      //            excludeSoAbis 'x86'
+    }
+  }
+  //     jars {
+  //         BaiduLBS_Android_debug { //过滤架包的名称
+  //             implementation = false
+  //             path = "/libs/excludes/BaiduLBS_Android_7.5.2.jar" //架包的路径
+  //             //            excludeClasses 'com.example.library.BaiduLocationService'
+  //             excludePackages  = ['com.baidu.android']
+  //             //            excludeSos 'liblocSDK7b'
+  //             //            excludeSoAbis 'x86'
+  //         }
+  //     }
 }
