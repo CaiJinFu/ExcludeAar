@@ -15,3 +15,31 @@ enableFeaturePreview('VERSION_CATALOGS')
 include ':exclude-demo',
         ':libraries:library',
         'exclude-plugin'
+
+// gradle生命周期监听器
+gradle.addBuildListener(new BuildListener() {
+
+    // 当 settings.gradle 文件解析完成时触发
+    @Override
+    void settingsEvaluated(Settings settings) {
+        println("settings 对象创建完成")
+    }
+
+    // 当所有 Project 实例创建完成时触发
+    @Override
+    void projectsLoaded(Gradle gradle) {
+        println("project 对象被创建完了")
+    }
+
+    // 当所有项目的 build.gradle 文件解析完成时触发
+    @Override
+    void projectsEvaluated(Gradle gradle) {
+        println("所有build.gralde都解析完了")
+    }
+
+    // 当整个构建完成时触发（成功或失败）
+    @Override
+    void buildFinished(BuildResult result) {
+        println("build.gradle文件解析完成")
+    }
+})

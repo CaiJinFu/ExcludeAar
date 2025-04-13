@@ -153,6 +153,7 @@ dependencies {
   // 这里是为了测试jar，具体实现看dependencyConfig.gradle
   implementation libs.appcompat
   implementation libs.kotlin.stdlib
+  compileOnly "com.alibaba:fastjson:1.2.79"
   // implementation "com.android.tools.build:gradle:7.4.2"
   // implementation(group: 'com.android.tools.build', name: 'gradle', version: '7.4.2')
 }
