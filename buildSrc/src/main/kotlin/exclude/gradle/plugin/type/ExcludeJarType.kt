@@ -17,6 +17,14 @@ import java.io.File
 open class ExcludeJarType(private val project: Project) {
     val extension: ExcludeExtension = project.extensions.findByType(ExcludeExtension::class.java)!!
 
+    fun getTaskNameOnlyTag(): String {
+        return "_${this::class.java.simpleName}"
+    }
+
+    protected open fun getFirstTaskNameOnlyTag(): String {
+        return ""
+    }
+
     /**
      * 插件生存的文件都存放在这个目录下面
      */
@@ -69,7 +77,7 @@ open class ExcludeJarType(private val project: Project) {
                 implementation(it)
             }
 
-            if(allTasks.isNotEmpty()) {
+            if (allTasks.isNotEmpty()) {
                 createExJarPluginTasks(allTasks)
             }
         }
@@ -79,17 +87,16 @@ open class ExcludeJarType(private val project: Project) {
      * 所有生产ex jar task
      */
     private fun createExJarPluginTasks(tasks: List<Task>) {
-        project.task("excludeJarPluginTask") {
+        project.task("${getFirstTaskNameOnlyTag()}excludeJarPluginTask") {
             it.group = "excludePlugin"
             it.setDependsOn(tasks)
         }
     }
 
-
     private fun implementation(extension: JarExcludeParam) {
         if (extension.implementation) {
             val task =
-                (project.tasks.getByName("ex_jar_${extension.name?.trim()}") as? AbstractArchiveTask)
+                (project.tasks.getByName("ex_jar_${extension.name?.trim()}${getTaskNameOnlyTag()}") as? AbstractArchiveTask)
             val jarFile = File(task?.destinationDir, task!!.archiveName)
             if (jarFile.exists()) {
                 project.dependencies.run {
@@ -110,12 +117,12 @@ open class ExcludeJarType(private val project: Project) {
         }.then(createExJar(extension))
 
     protected fun createUnZipJar(extension: JarExcludeParam) =
-        project.task<Copy>("unZip_jar_${extension.name?.trim()}") {
+        project.task<Copy>("unZip_jar_${extension.name?.trim()}${getTaskNameOnlyTag()}") {
             into(File(tempJarDir, extension.name!!))
         }
 
     protected fun createExJar(extension: JarExcludeParam) =
-        project.task<Jar>("ex_jar_${extension.name?.trim()}") {
+        project.task<Jar>("ex_jar_${extension.name?.trim()}${getTaskNameOnlyTag()}") {
             //文件名
             baseName = "classes"
             //输出的目录

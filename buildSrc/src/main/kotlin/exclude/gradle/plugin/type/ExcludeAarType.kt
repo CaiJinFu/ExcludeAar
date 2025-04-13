@@ -16,6 +16,10 @@ import java.io.File
  */
 class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
 
+    override fun getFirstTaskNameOnlyTag(): String {
+        return "excludeAar_"
+    }
+
     /**
      * 解压aar之后文件存放的目录
      */
@@ -57,7 +61,7 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
     private fun implementation(extension: JarExcludeParam) {
         if (extension.implementation) {
             //找一下生成aar包的任务
-            val task = (project.tasks.getByName("ex_aar_${extension.name?.trim()}") as? AbstractArchiveTask)
+            val task = (project.tasks.getByName("ex_aar_${extension.name?.trim()}${getTaskNameOnlyTag()}") as? AbstractArchiveTask)
             val aarFile = File(task?.destinationDir, task!!.archiveName)
             if (aarFile.exists()) {
                 project.dependencies.run {
@@ -88,7 +92,7 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
      * 3、删除已经被解压的jar
      */
     private fun createUnZipAar(extension: AarExcludeParam) =
-        project.task<Copy>("unZip_aar_${extension.name?.trim()}") {
+        project.task<Copy>("unZip_aar_${extension.name?.trim()}${getTaskNameOnlyTag()}") {
             val unZipAarFile = File(tempAarDir, extension.name!!)
             //解压之后aar的存放目录
             from(project.zipTree(File(extension.path!!)))
@@ -106,12 +110,12 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
                 }
 
 
-                (project.tasks.getByName("unZip_jar_${extension.name?.trim()}") as? AbstractCopyTask)?.from(
+                (project.tasks.getByName("unZip_jar_${extension.name?.trim()}${getTaskNameOnlyTag()}") as? AbstractCopyTask)?.from(
                     jarFiles.map {
                         project.zipTree(it)
                     })
 
-                (project.tasks.getByName("delete_jars_${extension.name?.trim()}") as? Delete)?.delete(
+                (project.tasks.getByName("delete_jars_${extension.name?.trim()}${getTaskNameOnlyTag()}") as? Delete)?.delete(
                     jarFiles
                 )
             }
@@ -122,12 +126,12 @@ class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
      * 创建删除Jar的任务
      */
     private fun createDeleteJars(extension: AarExcludeParam) =
-        project.task<Delete>("delete_jars_${extension.name?.trim()}") {
+        project.task<Delete>("delete_jars_${extension.name?.trim()}${getTaskNameOnlyTag()}") {
         }
 
 
     private fun createExAar(extension: AarExcludeParam) =
-        project.task<Zip>("ex_aar_${extension.name?.trim()}") {
+        project.task<Zip>("ex_aar_${extension.name?.trim()}${getTaskNameOnlyTag()}") {
             baseName = "ex_${extension.name}"
             setExtension("aar")
             from(File(tempAarDir, extension.name!!))

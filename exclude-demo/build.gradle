@@ -46,8 +46,8 @@ android {
 // 定义一个新的可解析配置，用于继承 implementation 的依赖
 configurations {
   resolvableDeps { // 创建名为 resolvableDeps 的新配置
-    canBeResolved = true    // 允许解析该配置（获取实际文件）
-    canBeConsumed = false   // 禁止其他模块使用此配置
+    canBeResolved = true // 允许解析该配置（获取实际文件）
+    canBeConsumed = false // 禁止其他模块使用此配置
     extendsFrom configurations.implementation // 继承所有 implementation 依赖
   }
 }
@@ -58,35 +58,35 @@ task copyDependenciesToRepo {
   // 自定义 repo 输出目录
   File targetRepoDir = new File("${rootDir}/repo")
   doFirst {
-    //删除repo目录
+    // 删除repo目录
     delete targetRepoDir
   }
 
   doLast {
     configurations.resolvableDeps.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        if (artifact.extension == 'aar') {
-            def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
-            def module = artifact.moduleVersion.id.name
-            def version = artifact.moduleVersion.id.version
+      if (artifact.extension == 'aar') {
+        def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
+        def module = artifact.moduleVersion.id.name
+        def version = artifact.moduleVersion.id.version
 
-            // 生成目录结构
-            def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
-            outputDir.mkdirs()
+        // 生成目录结构
+        def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
+        outputDir.mkdirs()
 
-            // 拷贝 aar
-            def aarFile = artifact.file
-            def aarDestFile = new File(outputDir, "${module}-${version}.aar")
-            aarFile.withInputStream { input ->
-                aarDestFile.withOutputStream { out -> out << input }
-            }
-
-            // 下载 pom 文件（这里以 Google 的仓库为例）
-            def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
-            def pomFile = new File(outputDir, "${module}-${version}.pom")
-            new URL(pomUrl).withInputStream { input ->
-                pomFile.withOutputStream { out -> out << input }
-            }
+        // 拷贝 aar
+        def aarFile = artifact.file
+        def aarDestFile = new File(outputDir, "${module}-${version}.aar")
+        aarFile.withInputStream { input ->
+          aarDestFile.withOutputStream { out -> out << input }
         }
+
+        // 下载 pom 文件（这里以 Google 的仓库为例）
+        def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
+        def pomFile = new File(outputDir, "${module}-${version}.pom")
+        new URL(pomUrl).withInputStream { input ->
+          pomFile.withOutputStream { out -> out << input }
+        }
+      }
     }
   }
 }
@@ -98,36 +98,36 @@ task copyDependenciesToRepo2 {
   // 自定义 repo 输出目录
   File targetRepoDir = new File("${rootDir}/repo")
   doFirst {
-    //删除repo目录
+    // 删除repo目录
     delete targetRepoDir
   }
 
   doLast {
     // 如果只想处理 Debug 变体的依赖，则使用 debugRuntimeClasspath
     configurations.debugRuntimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        if (artifact.extension == 'aar') {
-            def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
-            def module = artifact.moduleVersion.id.name
-            def version = artifact.moduleVersion.id.version
+      if (artifact.extension == 'aar') {
+        def groupPath = artifact.moduleVersion.id.group.replace('.', '/')
+        def module = artifact.moduleVersion.id.name
+        def version = artifact.moduleVersion.id.version
 
-            // 生成目录结构
-            def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
-            outputDir.mkdirs()
+        // 生成目录结构
+        def outputDir = new File(targetRepoDir, "${groupPath}/${module}/${version}")
+        outputDir.mkdirs()
 
-            // 拷贝 aar
-            def aarFile = artifact.file
-            def aarDestFile = new File(outputDir, "${module}-${version}.aar")
-            aarFile.withInputStream { input ->
-                aarDestFile.withOutputStream { out -> out << input }
-            }
-
-            // 下载 pom 文件
-            def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
-            def pomFile = new File(outputDir, "${module}-${version}.pom")
-            new URL(pomUrl).withInputStream { input ->
-                pomFile.withOutputStream { out -> out << input }
-            }
+        // 拷贝 aar
+        def aarFile = artifact.file
+        def aarDestFile = new File(outputDir, "${module}-${version}.aar")
+        aarFile.withInputStream { input ->
+          aarDestFile.withOutputStream { out -> out << input }
         }
+
+        // 下载 pom 文件
+        def pomUrl = "https://dl.google.com/dl/android/maven2/${groupPath}/${module}/${version}/${module}-${version}.pom"
+        def pomFile = new File(outputDir, "${module}-${version}.pom")
+        new URL(pomUrl).withInputStream { input ->
+          pomFile.withOutputStream { out -> out << input }
+        }
+      }
     }
   }
 }
@@ -163,9 +163,9 @@ excludePluginExt {
     BaiduLBS_Android_debug {
       // 过滤架包的名称
       implementation = false
-      path = "../repo/androidx/activity/activity/1.2.4/activity-1.2.4.aar" // 架包的路径
+      path = "/libs/excludes/BaiduLBS_Android_debug.aar" // 架包的路径
       //            excludeClasses 'com.example.library.BaiduLocationService'
-      excludePackages = ['androidx.activity.result']
+      excludePackages = ['com.baidu.location']
       //            excludeSos 'liblocSDK7b'
       //            excludeSoAbis 'x86'
     }
@@ -179,14 +179,15 @@ excludePluginExt {
       //            excludeSoAbis 'x86'
     }
   }
-  //     jars {
-  //         BaiduLBS_Android_debug { //过滤架包的名称
-  //             implementation = false
-  //             path = "/libs/excludes/BaiduLBS_Android_7.5.2.jar" //架包的路径
-  //             //            excludeClasses 'com.example.library.BaiduLocationService'
-  //             excludePackages  = ['com.baidu.android']
-  //             //            excludeSos 'liblocSDK7b'
-  //             //            excludeSoAbis 'x86'
-  //         }
-  //     }
+  jars {
+    BaiduLBS_Android_7_5_2 {
+      // 过滤架包的名称
+      implementation = false
+      path = "/libs/excludes/BaiduLBS_Android_7.5.2.jar" // 架包的路径
+      //            excludeClasses 'com.example.library.BaiduLocationService'
+      excludePackages = ['com.baidu.android']
+      //            excludeSos 'liblocSDK7b'
+      //            excludeSoAbis 'x86'
+    }
+  }
 }
