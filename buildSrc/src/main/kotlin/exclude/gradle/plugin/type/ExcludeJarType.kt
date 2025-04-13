@@ -21,7 +21,7 @@ open class ExcludeJarType(private val project: Project) {
         return "_${this::class.java.simpleName}"
     }
 
-    protected open fun getFirstTaskNameOnlyTag(): String {
+    protected open fun getExcludeJarTaskFirstName(): String {
         return ""
     }
 
@@ -87,7 +87,7 @@ open class ExcludeJarType(private val project: Project) {
      * 所有生产ex jar task
      */
     private fun createExJarPluginTasks(tasks: List<Task>) {
-        project.task("${getFirstTaskNameOnlyTag()}excludeJarPluginTask") {
+        project.task("${getExcludeJarTaskFirstName()}excludeJarPluginTask") {
             it.group = "excludePlugin"
             it.setDependsOn(tasks)
         }

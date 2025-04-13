@@ -16,7 +16,7 @@ import java.io.File
  */
 class ExcludeAarType(private val project: Project) : ExcludeJarType(project) {
 
-    override fun getFirstTaskNameOnlyTag(): String {
+    override fun getExcludeJarTaskFirstName(): String {
         return "excludeAar_"
     }
 
